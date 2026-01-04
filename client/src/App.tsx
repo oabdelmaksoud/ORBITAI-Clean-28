@@ -332,6 +332,10 @@ const App: React.FC = () => {
     if (hash.startsWith('#admin')) {
       return 'admin';
     }
+    // Check for landing explicitly
+    if (hash === '#landing') {
+      return 'landing';
+    }
     // Hub removed - no longer exists
     if (hash === '#setup') {
       return 'setup';
@@ -339,7 +343,8 @@ const App: React.FC = () => {
     if (hash === '#workspace') {
       return 'workspace';
     }
-    return 'landing';
+    // Default to setup instead of landing
+    return 'setup';
   };
 
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode());
@@ -347,8 +352,8 @@ const App: React.FC = () => {
   // Sync viewMode to URL hash for persistence across refresh
   useEffect(() => {
     const hashMap: Record<ViewMode, string> = {
-      'landing': '',
-      'setup': '#setup',
+      'setup': '',
+      'landing': '#landing',
       'workspace': '#workspace',
       'admin': '#admin',
       'shared': '#shared',
