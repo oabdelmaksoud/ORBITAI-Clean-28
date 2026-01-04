@@ -4,6 +4,8 @@ import { FileText, Layers, Zap, Sparkles, Palette, RefreshCw, Code, Smartphone, 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import PreviewFrame from './PreviewFrame';
+import SandpackPreview from './SandpackPreview';
+import PythonPreview from './PythonPreview';
 import PrototypePreviewToast from './PrototypePreviewToast';
 import { ProjectPreview } from '../services/geminiService';
 import { Artifact, Phase, FeatureCoverage } from '@orbitai/shared';
@@ -14,6 +16,7 @@ import IdeaTreeGraph from './IdeaTreeGraph';
 import GameMechanicsPanel from './GameMechanicsPanel';
 // Graph3D removed
 import { v4 as uuidv4 } from 'uuid';
+import { executionRoutingService, ExecutionTier, RoutingDecision } from '../services/executionRoutingService';
 
 
 // Helper function for cleaning Mermaid code - extracted from component
@@ -454,6 +457,25 @@ const PrototypingPanel: React.FC<PrototypingPanelProps> = ({
 
   // Quick refinement handler for toast chat
   const [isToastRefining, setIsToastRefining] = useState(false);
+
+  // Execution Runtime State (Tier 1: Sandpack, Tier 2: CoWasm, Tier 3: Firecracker)
+  const [activeRuntime, setActiveRuntime] = useState<ExecutionTier>('SANDPACK');
+  const [routingDecision, setRoutingDecision] = useState<RoutingDecision | null>(null);
+
+  // Route execution based on project context
+  useEffect(() => {
+    if (projectPreview) {
+      const context = {
+        files: projectPreview.wireframeCode ? [{ path: 'App.tsx', content: projectPreview.wireframeCode }] : [],
+        projectType: 'react' as const, // Default to React for now
+      };
+      const decision = executionRoutingService.route(context);
+      setRoutingDecision(decision);
+      setActiveRuntime(decision.tier);
+      console.log('[PrototypingPanel] Execution tier:', decision.tier, '-', decision.reason);
+    }
+  }, [projectPreview]);
+
   const handlePreviewRefine = useCallback(async (refinementMessage: string) => {
     console.log('[PrototypingPanel] Refining with message:', refinementMessage);
     setIsToastRefining(true);
@@ -1898,17 +1920,36 @@ const PrototypingPanel: React.FC<PrototypingPanelProps> = ({
                   </div>
                 )}
                 {wireframeArtifact ? (
-                  <PreviewFrame
-                    artifact={wireframeArtifact}
-                    viewType={activeView}
-                    theme={customTheme ? {
-                      primary: customTheme.primary,
-                      secondary: customTheme.secondary,
-                      accent: customTheme.accent,
-                      background: customTheme.background,
-                      textColor: customTheme.textColor
-                    } : undefined}
-                  />
+                  // Tier-based rendering
+                  activeRuntime === 'SANDPACK' ? (
+                    // Tier 1: Use SandpackPreview for instant React execution
+                    <SandpackPreview
+                      code={wireframeArtifact.content || ''}
+                      height="100%"
+                      showEditor={false}
+                      template="react"
+                    />
+                  ) : activeRuntime === 'COWASM' ? (
+                    // Tier 2: Use PythonPreview for Python execution
+                    <PythonPreview
+                      code={wireframeArtifact.content || ''}
+                      height="100%"
+                      autoRun={false}
+                    />
+                  ) : (
+                    // Tier 3 (Firecracker) or Fallback: Use legacy PreviewFrame
+                    <PreviewFrame
+                      artifact={wireframeArtifact}
+                      viewType={activeView}
+                      theme={customTheme ? {
+                        primary: customTheme.primary,
+                        secondary: customTheme.secondary,
+                        accent: customTheme.accent,
+                        background: customTheme.background,
+                        textColor: customTheme.textColor
+                      } : undefined}
+                    />
+                  )
                 ) : (
                   <div className="w-full h-full flex items-center justify-center p-8 bg-white">
                     <div className="text-center text-slate-500 max-w-md">

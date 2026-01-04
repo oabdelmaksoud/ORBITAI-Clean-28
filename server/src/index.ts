@@ -142,6 +142,7 @@ import speechRoutes from './routes/speech.routes.js';
 import maturityAssessmentRoutes from './routes/maturityAssessment.routes.js';
 import demoRoutes from './routes/demo.routes.js';
 import cuaRoutes from './routes/cua.routes.js';
+import workspaceRoutes from './routes/workspace.routes.js';
 
 import { multiCloudRoutes } from './routes/multiCloud.routes.js';
 import { deploymentRoutes } from './routes/deploymentOrchestrator.routes.js';
@@ -439,6 +440,13 @@ app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/files', fileUploadRoutes);
 app.use('/api/speech', speechRoutes);
 app.use('/api/maturity-assessment', maturityAssessmentRoutes);
+
+// Workspace persistence for Tier 1/2 -> Tier 3 transition
+app.use('/api/workspace', workspaceRoutes);
+
+// MicroVM management for Tier 3 (Firecracker/Fly.io)
+import vmRoutes from './routes/vm.routes.js';
+app.use('/api/vm', vmRoutes);
 
 // 404 handler for API routes (must be before error handler)
 app.use('/api/*', (req, res) => {
