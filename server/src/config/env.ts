@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -189,7 +190,7 @@ if (!apiKeyEncryptionKey || apiKeyEncryptionKey.trim() === '') {
       missingVars.push('API Key Encryption Key (production-safe)');
     }
   } else {
-    console.log('✅ API_KEY_ENCRYPTION_KEY is configured');
+    logger.info('✅ API_KEY_ENCRYPTION_KEY is configured');
   }
 }
 
@@ -202,7 +203,7 @@ for (const { key, value, name } of requiredVars) {
       warnings.push(`⚠️  WARNING: ${key} is not set or using default value`);
     }
   } else {
-    console.log(`✅ ${key} is configured`);
+    logger.info(`✅ ${key} is configured`);
   }
 }
 
@@ -219,10 +220,10 @@ const apiKeyProviders = [
 
 const envApiKeysFound = apiKeyProviders.filter(p => p.value && p.value.trim()).length;
 if (envApiKeysFound > 0) {
-  console.log(`ℹ️  Found ${envApiKeysFound} API key(s) in environment variables (using as fallback)`);
-  console.log(`   💡 Tip: Store API keys in database via Admin Console → Settings → API Keys for better security`);
+  logger.info(`ℹ️  Found ${envApiKeysFound} API key(s) in environment variables (using as fallback)`);
+  logger.info(`   💡 Tip: Store API keys in database via Admin Console → Settings → API Keys for better security`);
 } else {
-  console.log(`ℹ️  No API keys in environment variables (this is OK - use Admin Console to store them)`);
+  logger.info(`ℹ️  No API keys in environment variables (this is OK - use Admin Console to store them)`);
 }
 
 // Fail in production if required vars are missing

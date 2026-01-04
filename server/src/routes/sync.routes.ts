@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth.js';
 import fs from 'fs';
 import path from 'path';
 import { projectFileService } from '../services/projectFile.service.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.post('/files', authenticateToken, async (req: Request, res: Response): Pr
         res.status(200).json({ success: true, count: files.length });
 
     } catch (error) {
-        console.error('Sync failed:', error);
+        logger.error('Sync failed:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

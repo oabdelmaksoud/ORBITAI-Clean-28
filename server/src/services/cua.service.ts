@@ -1331,7 +1331,7 @@ Generate 8-15 tests with CORRECT dependencies. Setup tests MUST come first!`;
                         return isReady && (window as any).__reactReady === true;
                     }, { timeout: 15000 });
                 } catch (e) {
-                    console.log('Timeout waiting for React/Bootstrapper to load - proceeding to content check');
+                    logger.debug('Timeout waiting for React/Bootstrapper to load - proceeding to content check');
                 }
 
                 // Wait for content to render (React app usually mounts to #root or #app)
@@ -1347,7 +1347,7 @@ Generate 8-15 tests with CORRECT dependencies. Setup tests MUST come first!`;
                         return hasContent || hasOtherContent;
                     }, { timeout: 10000 });
                 } catch (e) {
-                    console.log('Timeout waiting for content render - checking for errors');
+                    logger.debug('Timeout waiting for content render - checking for errors');
                 }
 
                 // Buffer for any final animations
@@ -1447,7 +1447,7 @@ Generate 8-15 tests with CORRECT dependencies. Setup tests MUST come first!`;
                     if (!hasContent && !hasInteractiveElements) {
                         // DEBUG: Capture what IS on the page to debug why it's blank
                         const debugHtml = body.innerHTML?.substring(0, 500) || 'null';
-                        console.log('[CUA Debug] Blank page detected. InnerHTML start:', debugHtml);
+                        logger.debug('[CUA Debug] Blank page detected. InnerHTML start:', debugHtml);
 
                         return {
                             valid: false,

@@ -72,6 +72,19 @@ playwright-report/
 .env.production
 .env.local
 
+# Local data and temporary files
+data/
+*.md_history
+IMPLEMENTATION_SUMMARY.md
+PROJECT_REVIEW_2025.md
+RECOMMENDATIONS_PROGRESS.md
+CURRENT_STATUS.md
+PREVIEW_ISSUE_ROOT_CAUSE.md
+PROTOTYPE_PREVIEW_DIAGNOSTIC.md
+MISSION_CONTROL_TIMESTAMP_FIX.md
+PERFORMANCE_FIXES.md
+testsprite_tests/
+
 # Keep templates
 !.env.example
 !.env.production.example
