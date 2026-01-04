@@ -190,7 +190,8 @@ const GlassPanel: React.FC<GlassPanelProps> = ({
   const [editingIdeaId, setEditingIdeaId] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState('');
   const [editNotes, setEditNotes] = useState('');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['focus', 'insights', 'ideas']));
+  // Progressive Disclosure: Start with minimal sections expanded
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['focus']));
   const [searchQuery, setSearchQuery] = useState('');
   const [showStandards, setShowStandards] = useState(false);
   const [ideaFilter, setIdeaFilter] = useState<'all' | 'feature' | 'constraint' | 'opportunity' | 'risk' | 'requirement' | 'improvement' | 'idea' | 'other'>('all');

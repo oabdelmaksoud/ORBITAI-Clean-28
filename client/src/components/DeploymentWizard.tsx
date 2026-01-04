@@ -1,18 +1,18 @@
 /**
- * Deployment Wizard Component
- * Guides users through deployment setup with step-by-step configuration
+ * Simplified Deployment Experience
+ * One-Click deployment with simulated build logs (Market Alignment v2)
  */
 
-import React, { useState } from 'react';
-import { 
-  Rocket, 
-  CheckCircle2, 
-  ChevronRight, 
-  ChevronLeft, 
-  Settings, 
-  Globe, 
-  Key,
-  FileText,
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Rocket,
+  CheckCircle2,
+  X,
+  Terminal,
+  Loader2,
+  ExternalLink,
+  Globe,
+  Zap,
   AlertCircle
 } from 'lucide-react';
 
@@ -32,20 +32,27 @@ interface DeploymentConfig {
   startCommand?: string;
 }
 
-const PLATFORMS = [
-  { id: 'vercel', name: 'Vercel', icon: '🚀', description: 'Best for Next.js and React apps' },
-  { id: 'railway', name: 'Railway', icon: '🚂', description: 'Simple deployment with database' },
-  { id: 'render', name: 'Render', icon: '🎨', description: 'Full-stack apps and services' },
-  { id: 'netlify', name: 'Netlify', icon: '🌐', description: 'JAMstack and static sites' },
-  { id: 'aws', name: 'AWS', icon: '☁️', description: 'Enterprise-grade cloud' },
-  { id: 'gcp', name: 'Google Cloud', icon: '🔵', description: 'Scalable cloud platform' },
-  { id: 'azure', name: 'Azure', icon: '🔷', description: 'Microsoft cloud services' }
-];
+type DeploymentPhase = 'ready' | 'deploying' | 'success' | 'error';
 
-const ENVIRONMENTS = [
-  { id: 'development', name: 'Development', description: 'For testing and development' },
-  { id: 'staging', name: 'Staging', description: 'Pre-production environment' },
-  { id: 'production', name: 'Production', description: 'Live production environment' }
+const SIMULATED_LOGS = [
+  { text: '▸ Cloning repository...', delay: 300 },
+  { text: '✓ Repository cloned', delay: 600 },
+  { text: '▸ Installing dependencies...', delay: 400 },
+  { text: '  npm install', delay: 200 },
+  { text: '  added 847 packages in 12s', delay: 1200 },
+  { text: '✓ Dependencies installed', delay: 300 },
+  { text: '▸ Building application...', delay: 400 },
+  { text: '  vite build', delay: 200 },
+  { text: '  ✓ 156 modules transformed', delay: 800 },
+  { text: '  dist/index.html    0.45 kB', delay: 150 },
+  { text: '  dist/assets/index-Dk3f8s.js    285.32 kB', delay: 150 },
+  { text: '  dist/assets/index-Bx9dKs.css    42.17 kB', delay: 150 },
+  { text: '✓ Build complete', delay: 400 },
+  { text: '▸ Deploying to edge network...', delay: 500 },
+  { text: '  Uploading: ████████████████ 100%', delay: 1000 },
+  { text: '✓ Deployment successful!', delay: 500 },
+  { text: '', delay: 100 },
+  { text: '🚀 Your app is live at:', delay: 300 },
 ];
 
 const DeploymentWizard: React.FC<DeploymentWizardProps> = ({
@@ -54,231 +61,162 @@ const DeploymentWizard: React.FC<DeploymentWizardProps> = ({
   onDeploy,
   onCancel
 }) => {
-  const [step, setStep] = useState(1);
-  const [config, setConfig] = useState<DeploymentConfig>({
-    platform: '',
-    environment: 'staging',
-    envVars: {},
-    buildCommand: '',
-    startCommand: ''
-  });
+  const [phase, setPhase] = useState<DeploymentPhase>('ready');
+  const [logs, setLogs] = useState<string[]>([]);
+  const [deployedUrl, setDeployedUrl] = useState<string>('');
+  const logContainerRef = useRef<HTMLDivElement>(null);
 
-  const totalSteps = 4;
+  // Smart defaults (no multi-step config needed)
+  const defaultConfig: DeploymentConfig = {
+    platform: 'vercel',
+    environment: 'production',
+    envVars: {}
+  };
 
-  const handleNext = () => {
-    if (step < totalSteps) {
-      setStep(step + 1);
+  // Auto-scroll logs
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
-  };
+  }, [logs]);
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
+  const simulateDeployment = async () => {
+    setPhase('deploying');
+    setLogs([]);
+
+    // Simulate each log line with delays
+    for (const logItem of SIMULATED_LOGS) {
+      await new Promise(resolve => setTimeout(resolve, logItem.delay));
+      if (logItem.text) {
+        setLogs(prev => [...prev, logItem.text]);
+      }
     }
-  };
 
-  const handleDeploy = () => {
-    onDeploy(config);
-  };
+    // Generate a fake deployed URL
+    const slug = projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 20);
+    const fakeUrl = `https://${slug}-${projectId.slice(0, 6)}.vercel.app`;
+    setDeployedUrl(fakeUrl);
 
-  const updateConfig = (updates: Partial<DeploymentConfig>) => {
-    setConfig(prev => ({ ...prev, ...updates }));
-  };
+    await new Promise(resolve => setTimeout(resolve, 300));
+    setLogs(prev => [...prev, `   ${fakeUrl}`]);
 
-  const addEnvVar = () => {
-    const key = prompt('Environment variable name:');
-    if (key) {
-      updateConfig({
-        envVars: { ...config.envVars, [key]: '' }
-      });
-    }
-  };
-
-  const removeEnvVar = (key: string) => {
-    const newEnvVars = { ...config.envVars };
-    delete newEnvVars[key];
-    updateConfig({ envVars: newEnvVars });
-  };
-
-  const updateEnvVar = (key: string, value: string) => {
-    updateConfig({
-      envVars: { ...config.envVars, [key]: value }
-    });
+    setPhase('success');
+    onDeploy(defaultConfig);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-700">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-lg">
+        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-5">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <Rocket className="w-6 h-6" />
-                Deploy {projectName}
-              </h2>
-              <p className="text-blue-100 mt-1">Step {step} of {totalSteps}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                <Rocket className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">Deploy {projectName}</h2>
+                <p className="text-violet-200 text-sm">Go live in seconds</p>
+              </div>
             </div>
             <button
               onClick={onCancel}
-              className="text-white hover:bg-white/20 rounded-full p-2 transition"
+              className="text-white/70 hover:text-white hover:bg-white/10 rounded-full p-2 transition"
             >
-              ✕
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="px-6 pt-4">
-          <div className="flex items-center gap-2">
-            {[1, 2, 3, 4].map((s) => (
-              <React.Fragment key={s}>
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    s <= step
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
-                >
-                  {s < step ? <CheckCircle2 className="w-5 h-5" /> : s}
+        {/* Content */}
+        <div className="p-5">
+          {phase === 'ready' && (
+            <div className="space-y-4">
+              {/* Platform Badge */}
+              <div className="flex items-center justify-center gap-3 py-4">
+                <div className="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+                  <Globe className="w-4 h-4 text-violet-400" />
+                  <span className="text-slate-300 text-sm font-medium">Vercel</span>
+                  <span className="text-xs text-slate-500">(Edge Network)</span>
                 </div>
-                {s < totalSteps && (
+                <div className="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+                  <Zap className="w-4 h-4 text-yellow-400" />
+                  <span className="text-slate-300 text-sm font-medium">Production</span>
+                </div>
+              </div>
+
+              {/* Info Box */}
+              <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-slate-300 mb-2">What happens next?</h3>
+                <ul className="text-xs text-slate-400 space-y-1.5">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                    Your code will be built and optimized
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                    Deployed to a global edge network
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                    You'll get a unique URL to share
+                  </li>
+                </ul>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-200/80">
+                  This is a simulated deployment for demo purposes. Real deployments require platform authentication.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {(phase === 'deploying' || phase === 'success') && (
+            <div className="space-y-4">
+              {/* Terminal */}
+              <div
+                ref={logContainerRef}
+                className="bg-black rounded-lg p-4 font-mono text-xs h-64 overflow-y-auto border border-slate-700"
+              >
+                {logs.map((log, i) => (
                   <div
-                    className={`h-1 flex-1 ${
-                      s < step ? 'bg-blue-600' : 'bg-gray-200'
-                    }`}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-
-        {/* Step Content */}
-        <div className="p-6">
-          {/* Step 1: Platform Selection */}
-          {step === 1 && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                Select Platform
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                {PLATFORMS.map((platform) => (
-                  <button
-                    key={platform.id}
-                    onClick={() => updateConfig({ platform: platform.id })}
-                    className={`p-4 border-2 rounded-lg text-left transition ${
-                      config.platform === platform.id
-                        ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                    key={i}
+                    className={`${log.startsWith('✓') ? 'text-green-400' :
+                        log.startsWith('▸') ? 'text-violet-400' :
+                          log.startsWith('🚀') ? 'text-yellow-400 font-bold' :
+                            log.includes('https://') ? 'text-cyan-400 underline' :
+                              'text-slate-400'
+                      }`}
                   >
-                    <div className="text-2xl mb-2">{platform.icon}</div>
-                    <div className="font-semibold">{platform.name}</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {platform.description}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Environment Selection */}
-          {step === 2 && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                Select Environment
-              </h3>
-              <div className="space-y-3">
-                {ENVIRONMENTS.map((env) => (
-                  <button
-                    key={env.id}
-                    onClick={() => updateConfig({ environment: env.id })}
-                    className={`w-full p-4 border-2 rounded-lg text-left transition ${
-                      config.environment === env.id
-                        ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="font-semibold">{env.name}</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {env.description}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Environment Variables */}
-          {step === 3 && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Key className="w-5 h-5" />
-                Environment Variables
-              </h3>
-              <div className="space-y-3">
-                {Object.entries(config.envVars).map(([key, value]) => (
-                  <div key={key} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={key}
-                      readOnly
-                      className="flex-1 px-3 py-2 border rounded-lg bg-gray-50"
-                    />
-                    <input
-                      type="password"
-                      value={value}
-                      onChange={(e) => updateEnvVar(key, e.target.value)}
-                      placeholder="Value"
-                      className="flex-1 px-3 py-2 border rounded-lg"
-                    />
-                    <button
-                      onClick={() => removeEnvVar(key)}
-                      className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
-                    >
-                      Remove
-                    </button>
+                    {log}
                   </div>
                 ))}
-                <button
-                  onClick={addEnvVar}
-                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-600 hover:text-blue-600"
-                >
-                  + Add Environment Variable
-                </button>
+                {phase === 'deploying' && (
+                  <div className="flex items-center gap-2 text-slate-500 mt-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Running...</span>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
 
-          {/* Step 4: Review & Deploy */}
-          {step === 4 && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Review Configuration
-              </h3>
-              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                <div>
-                  <span className="font-semibold">Platform:</span>{' '}
-                  {PLATFORMS.find(p => p.id === config.platform)?.name || config.platform}
-                </div>
-                <div>
-                  <span className="font-semibold">Environment:</span>{' '}
-                  {ENVIRONMENTS.find(e => e.id === config.environment)?.name || config.environment}
-                </div>
-                <div>
-                  <span className="font-semibold">Environment Variables:</span>{' '}
-                  {Object.keys(config.envVars).length || 'None'}
-                </div>
-              </div>
-              {!config.platform && (
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2 text-yellow-800">
-                  <AlertCircle className="w-5 h-5" />
-                  Please select a platform to continue.
+              {/* Success State */}
+              {phase === 'success' && (
+                <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    <span className="text-green-300 font-medium text-sm">Deployment Complete!</span>
+                  </div>
+                  <a
+                    href={deployedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 text-sm"
+                  >
+                    Visit Site <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                 </div>
               )}
             </div>
@@ -286,32 +224,40 @@ const DeploymentWizard: React.FC<DeploymentWizardProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t flex justify-between">
-          <button
-            onClick={handleBack}
-            disabled={step === 1}
-            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Back
-          </button>
-          {step < totalSteps ? (
+        <div className="px-5 py-4 border-t border-slate-700 flex justify-end gap-3">
+          {phase === 'ready' && (
+            <>
+              <button
+                onClick={onCancel}
+                className="px-4 py-2 text-slate-400 hover:text-slate-200 text-sm font-medium transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={simulateDeployment}
+                className="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-lg font-semibold text-sm flex items-center gap-2 transition shadow-lg shadow-violet-500/25"
+              >
+                <Rocket className="w-4 h-4" />
+                Deploy Now
+              </button>
+            </>
+          )}
+          {phase === 'deploying' && (
             <button
-              onClick={handleNext}
-              disabled={step === 1 && !config.platform}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              disabled
+              className="px-5 py-2.5 bg-slate-700 text-slate-400 rounded-lg font-semibold text-sm flex items-center gap-2 cursor-not-allowed"
             >
-              Next
-              <ChevronRight className="w-4 h-4" />
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Deploying...
             </button>
-          ) : (
+          )}
+          {phase === 'success' && (
             <button
-              onClick={handleDeploy}
-              disabled={!config.platform}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              onClick={onCancel}
+              className="px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-lg font-semibold text-sm flex items-center gap-2 transition"
             >
-              <Rocket className="w-4 h-4" />
-              Deploy
+              <CheckCircle2 className="w-4 h-4" />
+              Done
             </button>
           )}
         </div>
@@ -321,7 +267,3 @@ const DeploymentWizard: React.FC<DeploymentWizardProps> = ({
 };
 
 export default DeploymentWizard;
-
-
-
-

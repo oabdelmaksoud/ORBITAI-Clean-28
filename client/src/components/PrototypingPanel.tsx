@@ -458,23 +458,28 @@ const PrototypingPanel: React.FC<PrototypingPanelProps> = ({
   // Quick refinement handler for toast chat
   const [isToastRefining, setIsToastRefining] = useState(false);
 
-  // Execution Runtime State (Tier 1: Sandpack, Tier 2: CoWasm, Tier 3: Firecracker)
-  const [activeRuntime, setActiveRuntime] = useState<ExecutionTier>('SANDPACK');
+  // Execution Runtime State (Tier 1: Sandpack, Tier 2: CoWasm, Tier 3: Firecracker, Tier 4: HTML Iframe)
+  const [activeRuntime, setActiveRuntime] = useState<ExecutionTier>('HTML_IFRAME');
   const [routingDecision, setRoutingDecision] = useState<RoutingDecision | null>(null);
 
-  // Route execution based on project context
+  // Route execution based on ACTUAL CONTENT FORMAT (not just project type)
   useEffect(() => {
-    if (projectPreview) {
-      const context = {
-        files: projectPreview.wireframeCode ? [{ path: 'App.tsx', content: projectPreview.wireframeCode }] : [],
-        projectType: 'react' as const, // Default to React for now
-      };
-      const decision = executionRoutingService.route(context);
+    if (projectPreview?.wireframeCode) {
+      // Use content-based routing to detect HTML vs React/JSX
+      const decision = executionRoutingService.routeByContent(projectPreview.wireframeCode);
       setRoutingDecision(decision);
       setActiveRuntime(decision.tier);
-      console.log('[PrototypingPanel] Execution tier:', decision.tier, '-', decision.reason);
+      console.log('[PrototypingPanel] Content-based routing:', {
+        tier: decision.tier,
+        reason: decision.reason,
+        contentFormat: executionRoutingService.detectContentFormat(projectPreview.wireframeCode),
+        codeSnippet: projectPreview.wireframeCode.substring(0, 100)
+      });
+    } else {
+      // Default to HTML_IFRAME when no content
+      setActiveRuntime('HTML_IFRAME');
     }
-  }, [projectPreview]);
+  }, [projectPreview?.wireframeCode]);
 
   const handlePreviewRefine = useCallback(async (refinementMessage: string) => {
     console.log('[PrototypingPanel] Refining with message:', refinementMessage);
@@ -1920,9 +1925,9 @@ const PrototypingPanel: React.FC<PrototypingPanelProps> = ({
                   </div>
                 )}
                 {wireframeArtifact ? (
-                  // Tier-based rendering
+                  // Tier-based rendering based on content format detection
                   activeRuntime === 'SANDPACK' ? (
-                    // Tier 1: Use SandpackPreview for instant React execution
+                    // Tier 1: Use SandpackPreview for pure React/JSX execution
                     <SandpackPreview
                       code={wireframeArtifact.content || ''}
                       height="100%"
@@ -1937,7 +1942,8 @@ const PrototypingPanel: React.FC<PrototypingPanelProps> = ({
                       autoRun={false}
                     />
                   ) : (
-                    // Tier 3 (Firecracker) or Fallback: Use legacy PreviewFrame
+                    // Tier 3 (Firecracker), Tier 4 (HTML_IFRAME), or Fallback: Use PreviewFrame
+                    // PreviewFrame handles full HTML documents with embedded React/Babel correctly
                     <PreviewFrame
                       artifact={wireframeArtifact}
                       viewType={activeView}

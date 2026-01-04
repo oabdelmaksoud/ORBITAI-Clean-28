@@ -8,7 +8,12 @@
  * Tier 3 (Firecracker): Enterprise Docker/VM for heavy workloads & CUA
  */
 
-export type ExecutionTier = 'SANDPACK' | 'COWASM' | 'FIRECRACKER';
+export type ExecutionTier = 'SANDPACK' | 'COWASM' | 'FIRECRACKER' | 'HTML_IFRAME';
+
+/**
+ * Content format detected from code analysis
+ */
+export type ContentFormat = 'html' | 'react-jsx' | 'python' | 'unknown';
 
 export interface RoutingDecision {
     tier: ExecutionTier;
@@ -255,6 +260,91 @@ class ExecutionRoutingService {
     }
 
     /**
+     * Detect content format from the code content itself
+     * This is critical for routing to the correct renderer
+     */
+    detectContentFormat(code: string | undefined): ContentFormat {
+        if (!code || code.trim().length === 0) {
+            return 'unknown';
+        }
+
+        const trimmedCode = code.trim();
+
+        // Check for full HTML document (contains DOCTYPE or html tag)
+        if (
+            trimmedCode.includes('<!DOCTYPE') ||
+            trimmedCode.includes('<html') ||
+            (trimmedCode.startsWith('<') && trimmedCode.includes('<head') && trimmedCode.includes('<body'))
+        ) {
+            return 'html';
+        }
+
+        // Check for Python code
+        if (
+            trimmedCode.includes('def ') ||
+            trimmedCode.includes('import ') ||
+            trimmedCode.includes('from ') ||
+            trimmedCode.includes('class ') && trimmedCode.includes(':\n')
+        ) {
+            return 'python';
+        }
+
+        // Check for React/JSX patterns
+        if (
+            trimmedCode.includes('export default') ||
+            trimmedCode.includes('React.') ||
+            trimmedCode.includes('import React') ||
+            trimmedCode.includes('useState') ||
+            trimmedCode.includes('useEffect') ||
+            (trimmedCode.includes('function') && trimmedCode.includes('return') && trimmedCode.includes('<'))
+        ) {
+            return 'react-jsx';
+        }
+
+        // If it starts with JSX-like markup but no HTML document markers
+        if (trimmedCode.startsWith('<') && !trimmedCode.includes('<html') && !trimmedCode.includes('<!DOCTYPE')) {
+            return 'react-jsx';
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Route based on content format (for wireframe code)
+     */
+    routeByContent(code: string | undefined): RoutingDecision {
+        const format = this.detectContentFormat(code);
+
+        switch (format) {
+            case 'html':
+                return {
+                    tier: 'HTML_IFRAME',
+                    reason: 'Full HTML document detected - using iframe renderer',
+                    capabilities: ['html', 'css', 'javascript', 'tailwind'],
+                };
+            case 'python':
+                return {
+                    tier: 'COWASM',
+                    reason: 'Python code detected - using WASM Python runtime',
+                    capabilities: ['python', 'filesystem'],
+                };
+            case 'react-jsx':
+                return {
+                    tier: 'SANDPACK',
+                    reason: 'React/JSX code detected - using Sandpack preview',
+                    capabilities: ['react', 'typescript', 'tailwind', 'hot-reload'],
+                };
+            default:
+                // Default to HTML_IFRAME as it's the most permissive
+                return {
+                    tier: 'HTML_IFRAME',
+                    reason: 'Unknown format - defaulting to iframe renderer',
+                    capabilities: ['html', 'css', 'javascript'],
+                };
+        }
+    }
+
+    /**
      * Get human-readable tier description
      */
     getTierDescription(tier: ExecutionTier): string {
@@ -265,6 +355,8 @@ class ExecutionRoutingService {
                 return 'Universal Runtime (Python/Node/C++)';
             case 'FIRECRACKER':
                 return 'Full VM (Docker/Database/CUA)';
+            case 'HTML_IFRAME':
+                return 'HTML Preview (Iframe)';
         }
     }
 
@@ -276,6 +368,7 @@ class ExecutionRoutingService {
             SANDPACK: ['react', 'vue', 'vite', 'nextjs', 'typescript', 'tailwind', 'hot-reload'],
             COWASM: ['python', 'node', 'cpp', 'filesystem', 'networking', 'process-spawn'],
             FIRECRACKER: ['docker', 'database', 'native-binaries', 'cua-testing', 'full-linux'],
+            HTML_IFRAME: ['html', 'css', 'javascript', 'tailwind', 'babel'],
         };
 
         return capabilities[tier]?.includes(capability) ?? false;
