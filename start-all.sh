@@ -68,5 +68,4 @@ echo -e "${YELLOW}Press Ctrl+C to stop all servers${NC}"
 echo ""
 
 # Start both servers using concurrently
-npm run dev:all
-
+npm run dev

@@ -25,6 +25,7 @@
     "seed-homepage": "tsx scripts/seed-homepage-content.ts",
     "seed-mcp-servers": "tsx scripts/seed-mcp-servers.ts",
     "seed-routing-rules": "tsx scripts/seed-routing-rules.ts",
+    "seed-api-keys": "tsx scripts/seed-api-keys.ts",
     "seed-hosting-plans": "tsx scripts/seed-hosting-plans.ts",
     "analyze-users": "tsx scripts/analyze-users.ts",
     "cleanup-test-users": "tsx scripts/cleanup-test-users.ts"

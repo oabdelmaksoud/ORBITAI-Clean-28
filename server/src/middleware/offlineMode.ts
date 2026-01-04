@@ -3,14 +3,14 @@ import mongoose from 'mongoose';
 import { logger } from '../utils/logger.js';
 
 export const offlineModeMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const { readyState } = mongoose.connection;
+    const { method, path } = req;
+    // Define critical paths to intercept
     // Check if Mongoose is connected (readyState 1 = connected)
-    if (mongoose.connection.readyState === 1) {
+    if (readyState === 1) {
         return next();
     }
 
-    // Define critical paths to intercept
-    const path = req.path;
-    const method = req.method;
 
     // Mock Admin User
     const mockUser = {
