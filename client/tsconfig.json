@@ -23,6 +23,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@src/*": [
+        "./src/*"
+      ],
       "@orbitai/shared": [
         "../shared/index.ts"
       ]

@@ -17,7 +17,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const navigationItems = [
-    { id: 'hub', label: 'Hub', icon: Home },
+    { id: 'landing', label: 'Home', icon: Home },
     { id: 'workspace', label: 'Workspace', icon: LayoutGrid },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -101,11 +101,10 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     <button
                       key={item.id}
                       onClick={() => handleNavigate(item.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-4 text-left transition-colors touch-manipulation ${
-                        isActive
+                      className={`w-full flex items-center gap-3 px-4 py-4 text-left transition-colors touch-manipulation ${isActive
                           ? 'bg-primary/10 text-primary border-l-4 border-primary'
                           : 'text-slate-700 hover:bg-slate-50'
-                      }`}
+                        }`}
                       style={{ minHeight: '44px' }}
                       aria-current={isActive ? 'page' : undefined}
                     >

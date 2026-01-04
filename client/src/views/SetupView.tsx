@@ -26,7 +26,7 @@ interface SetupViewProps {
     dismissedGuestBanner: boolean;
     setDismissedGuestBanner: (dismissed: boolean) => void;
     setShowUserSignup: (show: boolean) => void;
-    setViewMode: (mode: 'hub' | 'setup' | 'workspace' | 'landing' | 'admin' | 'shared') => void;
+    setViewMode: (mode: 'setup' | 'workspace' | 'landing' | 'admin' | 'shared') => void;
 
     // Setup state (Existing props maintained for compatibility)
     setupMessages: ChatMessage[];

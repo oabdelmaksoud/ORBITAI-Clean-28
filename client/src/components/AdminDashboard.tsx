@@ -125,7 +125,7 @@ interface User {
 // Removed unused MOCK_USERS - AdminDashboard uses real API data
 
 // Helper function to get initial tab from URL or localStorage
-const getInitialTab = (): 'overview' | 'live-activity' | 'user-feature-access' | 'security' | 'moderation' | 'llm-model-management' | 'ai-agents' | 'process-management' | 'settings' | 'database' | 'backups' | 'performance-monitoring' | 'integrations' | 'cloud-deployment' | 'rate-limiting' | 'alerts' | 'system-audit-logs' | 'financials' | 'packages' | 'analytics' | 'reports' | 'page-editor' | 'support-tickets' | 'support-chat' | 'support-templates' => {
+const getInitialTab = (): 'overview' | 'live-activity' | 'user-feature-access' | 'security' | 'api-keys' | 'moderation' | 'llm-router-settings' | 'internal-router-settings' | 'llm-model-management' | 'ai-agents' | 'process-management' | 'settings' | 'database' | 'backups' | 'performance-monitoring' | 'integrations' | 'cloud-deployment' | 'rate-limiting' | 'alerts' | 'system-audit-logs' | 'financials' | 'packages' | 'analytics' | 'reports' | 'page-editor' | 'support-tickets' | 'support-chat' | 'support-templates' => {
     // First, try to get from URL hash parameter
     if (typeof window !== 'undefined') {
         const hash = window.location.hash;
@@ -429,7 +429,7 @@ const SECTION_DESCRIPTIONS: Record<string, { title: string; description: string 
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, token }) => {
     const initialTab = getInitialTab();
-    const [activeTab, setActiveTab] = useState<'overview' | 'live-activity' | 'user-feature-access' | 'security' | 'moderation' | 'llm-model-management' | 'ai-agents' | 'process-management' | 'settings' | 'database' | 'backups' | 'performance-monitoring' | 'integrations' | 'cloud-deployment' | 'rate-limiting' | 'alerts' | 'system-audit-logs' | 'financials' | 'packages' | 'analytics' | 'reports' | 'page-editor' | 'support-tickets' | 'support-chat' | 'support-templates'>(initialTab);
+    const [activeTab, setActiveTab] = useState<'overview' | 'live-activity' | 'user-feature-access' | 'security' | 'api-keys' | 'moderation' | 'llm-router-settings' | 'internal-router-settings' | 'llm-model-management' | 'ai-agents' | 'process-management' | 'settings' | 'database' | 'backups' | 'performance-monitoring' | 'integrations' | 'cloud-deployment' | 'rate-limiting' | 'alerts' | 'system-audit-logs' | 'financials' | 'packages' | 'analytics' | 'reports' | 'page-editor' | 'support-tickets' | 'support-chat' | 'support-templates'>(initialTab);
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(getInitialExpandedCategories(initialTab));
     const [projects, setProjects] = useState<ProjectMeta[]>([]);
     const [users, setUsers] = useState<User[]>([]);
@@ -1945,8 +1945,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, token }) => {
                         </div>
                     )}
 
-                    {/* OLD OVERVIEW - KEPT FOR REFERENCE */}
-                    {false && activeTab === 'overview-old' && (
+                    {/* OLD OVERVIEW - KEPT FOR REFERENCE - DISABLED */}
+                    {false && (activeTab as string) === 'overview-old' && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {dashboardStats ? (
@@ -2283,7 +2283,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, token }) => {
                             {/* Quick Links to Detailed Sections */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <button
-                                    onClick={() => setActiveTab('finance')}
+                                    onClick={() => setActiveTab('financials')}
                                     className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-left group"
                                 >
                                     <div className="flex items-center justify-between mb-2">
@@ -2316,8 +2316,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, token }) => {
                         </div>
                     )}
 
-                    {/* OLD USERS TAB - REMOVED */}
-                    {false && activeTab === 'users' && (
+                    {/* OLD USERS TAB - REMOVED - DISABLED */}
+                    {false && (activeTab as string) === 'users' && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             {!canManageUsers && !userManagementLoading && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">

@@ -168,7 +168,7 @@ interface WorkspaceViewProps {
   setShowMobileDeploymentWizard: (value: boolean) => void; // New: Mobile deployment wizard
   setEditingTask: (task: any) => void;
   setSelectedAgentDetail: (agent: any) => void;
-  setViewMode: (mode: 'landing' | 'hub' | 'setup' | 'workspace' | 'admin' | 'shared') => void;
+  setViewMode: (mode: 'landing' | 'setup' | 'workspace' | 'admin' | 'shared') => void;
 
   // Action handlers
   handleUndo: () => void;
@@ -647,16 +647,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              // Force navigation to hub - set flag to prevent hash handler interference
-              isProgrammaticHashChangeRef.current = true;
-              // Set viewMode first, then update hash
-              setViewMode('hub');
-              // Use setTimeout to ensure viewMode is set before hash change
-              setTimeout(() => {
-                window.location.hash = '#hub';
-                // Force a hash change event if needed
-                window.dispatchEvent(new HashChangeEvent('hashchange'));
-              }, 0);
+              // Navigate to landing page
+              setViewMode('landing');
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors border border-slate-200 shrink-0"
           >

@@ -386,4 +386,4 @@ export const appReducer = (state: ProjectState, action: AppAction): ProjectState
 /**
  * View mode type
  */
-export type ViewMode = 'landing' | 'hub' | 'setup' | 'workspace' | 'admin' | 'shared' | 'agentic-demo';
+export type ViewMode = 'landing' | 'setup' | 'workspace' | 'admin' | 'shared' | 'agentic-demo';

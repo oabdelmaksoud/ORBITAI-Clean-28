@@ -16,9 +16,7 @@ export const useViewMode = (user: UserProfile | null) => {
     if (hash.startsWith('#admin')) {
       return 'admin';
     }
-    if (hash === '#hub') {
-      return 'hub';
-    }
+    // Hub removed - no longer exists
     if (hash === '#setup') {
       return 'setup';
     }
@@ -40,16 +38,15 @@ export const useViewMode = (user: UserProfile | null) => {
     const currentHash = window.location.hash;
     const expectedHash =
       viewMode === 'admin' ? '#admin' :
-      viewMode === 'hub' ? '#hub' :
-      viewMode === 'setup' ? '#setup' :
-      viewMode === 'workspace' ? '#workspace' :
-      viewMode === 'landing' ? '' : null;
+        viewMode === 'setup' ? '#setup' :
+          viewMode === 'workspace' ? '#workspace' :
+            viewMode === 'landing' ? '' : null;
 
     // Only update hash if it doesn't match expected value
     // For admin mode, check if hash starts with #admin (to preserve tab parameters)
     const hashMatches = expectedHash === null ? false :
       viewMode === 'admin' ? currentHash.startsWith('#admin') :
-      currentHash === expectedHash;
+        currentHash === expectedHash;
 
     if (expectedHash !== null && !hashMatches) {
       // Skip update if hash is already being changed programmatically
@@ -67,9 +64,6 @@ export const useViewMode = (user: UserProfile | null) => {
         if (!currentHashInEffect.startsWith('#admin')) {
           window.location.hash = '#admin';
         }
-      } else if (viewMode === 'hub') {
-        // Allow hub navigation even without user (for guest mode)
-        window.location.hash = '#hub';
       } else if (viewMode === 'setup') {
         window.location.hash = '#setup';
       } else if (viewMode === 'workspace') {
@@ -97,8 +91,6 @@ export const useViewMode = (user: UserProfile | null) => {
 
       if (hash.startsWith('#admin')) {
         newViewMode = 'admin';
-      } else if (hash === '#hub') {
-        newViewMode = 'hub';
       } else if (hash === '#setup') {
         newViewMode = 'setup';
       } else if (hash === '#workspace') {

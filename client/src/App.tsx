@@ -245,7 +245,7 @@ const ProcessingOverlay = ({
   );
 };
 
-type ViewMode = 'landing' | 'hub' | 'setup' | 'workspace' | 'admin' | 'shared' | 'agentic-demo';
+type ViewMode = 'landing' | 'setup' | 'workspace' | 'admin' | 'shared' | 'agentic-demo';
 
 const App: React.FC = () => {
   // Reload loop detection and prevention
@@ -332,9 +332,7 @@ const App: React.FC = () => {
     if (hash.startsWith('#admin')) {
       return 'admin';
     }
-    if (hash === '#hub') {
-      return 'hub';
-    }
+    // Hub removed - no longer exists
     if (hash === '#setup') {
       return 'setup';
     }
@@ -345,6 +343,30 @@ const App: React.FC = () => {
   };
 
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode());
+
+  // Sync viewMode to URL hash for persistence across refresh
+  useEffect(() => {
+    const hashMap: Record<ViewMode, string> = {
+      'landing': '',
+      'setup': '#setup',
+      'workspace': '#workspace',
+      'admin': '#admin',
+      'shared': '#shared',
+      'agentic-demo': '#agentic-demo'
+    };
+
+    const targetHash = hashMap[viewMode] || '';
+    const currentHash = window.location.hash;
+
+    // Only update if different to prevent loops
+    // Don't update if both are empty/landing
+    if (currentHash !== targetHash && !(currentHash === '' && targetHash === '') && !(currentHash === '#' && targetHash === '')) {
+      // Preserve existing query params (like ?project=...)
+      const url = new URL(window.location.href);
+      url.hash = targetHash;
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [viewMode]);
 
   // --- MODERN VIEW STATE ---
   const [isModernView, setIsModernView] = useState<boolean>(() => {
@@ -1234,9 +1256,6 @@ const App: React.FC = () => {
         // Check if hash starts with #admin (supports #admin?tab=finance format)
         if (hash.startsWith('#admin') && currentViewMode !== 'admin') {
           startTransition(() => setViewMode('admin'));
-        } else if (hash === '#hub' && currentViewMode !== 'hub') {
-          // Allow navigation to hub even without user (for guest mode)
-          startTransition(() => setViewMode('hub'));
         } else if (hash === '#setup' && currentViewMode !== 'setup') {
           startTransition(() => setViewMode('setup'));
         } else if (hash === '#workspace' && currentViewMode !== 'workspace') {
@@ -1364,7 +1383,7 @@ const App: React.FC = () => {
                   currentProjectId = null;
                   setIsRestoring(false);
                   startTransition(() => {
-                    setViewMode('hub');
+                    setViewMode('landing');
                   });
                   window.location.hash = '#hub';
                   return; // Exit early - don't make API request
@@ -1397,7 +1416,7 @@ const App: React.FC = () => {
                       // Redirect to hub silently (no warning - this is expected behavior)
                       setIsRestoring(false);
                       startTransition(() => {
-                        setViewMode('hub');
+                        setViewMode('landing');
                       });
                       window.location.hash = '#hub';
                       return; // Exit early - don't try to load again
@@ -1421,7 +1440,7 @@ const App: React.FC = () => {
                       // Redirect to hub silently (no warning - this is expected behavior)
                       setIsRestoring(false);
                       startTransition(() => {
-                        setViewMode('hub');
+                        setViewMode('landing');
                       });
                       window.location.hash = '#hub';
                       return; // Exit early
@@ -1441,7 +1460,7 @@ const App: React.FC = () => {
                     currentProjectId = null;
                     // Redirect to hub on error
                     setIsRestoring(false);
-                    setViewMode('hub');
+                    setViewMode('landing');
                     window.location.hash = '#hub';
                     return; // Exit early
                   }
@@ -1616,7 +1635,7 @@ const App: React.FC = () => {
                   window.history.replaceState({}, '', url.toString());
                   setIsRestoring(false);
                   startTransition(() => {
-                    setViewMode('hub');
+                    setViewMode('landing');
                   });
                   window.location.hash = '#hub';
                 }
@@ -1633,7 +1652,7 @@ const App: React.FC = () => {
                   }
                 }
                 setIsRestoring(false);
-                setViewMode('hub');
+                setViewMode('landing');
                 window.location.hash = '#hub';
               }
             } catch (e) {
@@ -1643,7 +1662,7 @@ const App: React.FC = () => {
               const url = new URL(window.location.href);
               url.searchParams.delete('project');
               window.history.replaceState({}, '', url.toString());
-              setViewMode('hub');
+              setViewMode('landing');
               window.location.hash = '#hub';
             }
           })();
@@ -1864,7 +1883,7 @@ const App: React.FC = () => {
 
     // User is authenticated, proceed to console
     if (projectList.length > 0) {
-      setViewMode('hub');
+      setViewMode('landing');
     } else {
       // Use setTimeout to ensure handleCreateNewProject is defined
       setTimeout(() => {
@@ -1881,7 +1900,7 @@ const App: React.FC = () => {
 
   const handleLaunchDemo = () => {
     // For non-users, show hub view in demo mode
-    setViewMode('hub');
+    setViewMode('landing');
     window.location.hash = '#hub';
   };
 
@@ -1953,7 +1972,7 @@ const App: React.FC = () => {
 
     // After login, automatically launch the console
     if (projectList.length > 0) {
-      setViewMode('hub');
+      setViewMode('landing');
     } else {
       // Use setTimeout to ensure handleCreateNewProject is defined
       setTimeout(() => {
@@ -2017,7 +2036,7 @@ const App: React.FC = () => {
 
     // After signup, automatically launch the console
     if (projectList.length > 0) {
-      setViewMode('hub');
+      setViewMode('landing');
     } else {
       handleCreateNewProject();
     }
@@ -2065,10 +2084,9 @@ const App: React.FC = () => {
     const currentHash = window.location.hash;
     const expectedHash =
       viewMode === 'admin' ? '#admin' :
-        viewMode === 'hub' ? '#hub' :
-          viewMode === 'setup' ? '#setup' :
-            viewMode === 'workspace' ? '#workspace' :
-              viewMode === 'landing' ? '' : null;
+        viewMode === 'setup' ? '#setup' :
+          viewMode === 'workspace' ? '#workspace' :
+            viewMode === 'landing' ? '' : null;
 
     // Only update hash if it doesn't match expected value
     // For admin mode, check if hash starts with #admin (to preserve tab parameters)
@@ -2092,9 +2110,6 @@ const App: React.FC = () => {
         if (!currentHashInEffect.startsWith('#admin')) {
           window.location.hash = '#admin';
         }
-      } else if (viewMode === 'hub') {
-        // Allow hub navigation even without user (for guest mode)
-        window.location.hash = '#hub';
       } else if (viewMode === 'setup') {
         window.location.hash = '#setup';
       } else if (viewMode === 'workspace') {
@@ -2124,7 +2139,7 @@ const App: React.FC = () => {
     localStorage.removeItem('admin_token');
     setAdminToken(null);
     setAdminUser(null);
-    setViewMode('hub');
+    setViewMode('landing');
     // Explicitly update hash to ensure navigation works
     isProgrammaticHashChangeRef.current = true;
     window.location.hash = '#hub';
@@ -5503,7 +5518,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleResetProject = () => { setViewMode('hub'); };
+  const handleResetProject = () => { setViewMode('landing'); };
   const orchestratePhase = async (phase: Phase, description: string) => {
     // Track start time for accurate time estimation
     const startTime = Date.now();

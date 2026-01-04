@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Users, Clock, Archive, ArrowRight, Settings, X } from 'lucide-react';
-import { brainstormingRoomApi, BrainstormingRoom, CreateRoomData } from '@src/services/brainstormingRoomApi';
+import { brainstormingRoomApi, BrainstormingRoom, CreateRoomData } from '@/services/brainstormingRoomApi';
 import { toast } from '../services/toastService';
 import AttendeeLimitIndicator from './AttendeeLimitIndicator';
 
@@ -62,7 +62,7 @@ const BrainstormingRoomManager: React.FC<BrainstormingRoomManagerProps> = ({
       setShowCreateModal(false);
       setNewRoom({ name: '', description: '', sessionTemplate: 'brainstorm' });
       toast.success('Room created successfully');
-      
+
       if (onSelectRoom) {
         onSelectRoom(room.id);
       }
@@ -151,9 +151,8 @@ const BrainstormingRoomManager: React.FC<BrainstormingRoomManagerProps> = ({
             {rooms.map(room => (
               <div
                 key={room.id}
-                className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${
-                  currentRoomId === room.id ? 'ring-2 ring-purple-500' : ''
-                }`}
+                className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${currentRoomId === room.id ? 'ring-2 ring-purple-500' : ''
+                  }`}
                 onClick={() => onSelectRoom && onSelectRoom(room.id)}
               >
                 <div className="flex items-start justify-between mb-2">
@@ -170,11 +169,11 @@ const BrainstormingRoomManager: React.FC<BrainstormingRoomManagerProps> = ({
                     </button>
                   )}
                 </div>
-                
+
                 {room.topic && (
                   <p className="text-sm text-gray-600 mb-2 line-clamp-2">{room.topic}</p>
                 )}
-                
+
                 <div className="flex items-center gap-4 text-xs text-gray-500 mt-3">
                   <div className="flex items-center gap-1">
                     <Users className="w-3 h-3" />

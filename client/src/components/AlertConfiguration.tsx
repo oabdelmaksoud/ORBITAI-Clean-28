@@ -95,7 +95,7 @@ const AlertConfiguration: React.FC<AlertConfigurationProps> = ({ token }) => {
   const handleDeleteRule = async (ruleId: string) => {
     if (!token) return;
     if (!(await showConfirm('Are you sure you want to delete this alert rule?'))) return;
-    
+
     try {
       await deleteAlertRule(token, ruleId);
       await loadRules();
@@ -199,12 +199,11 @@ const AlertConfiguration: React.FC<AlertConfigurationProps> = ({ token }) => {
                       <div className="flex items-center gap-3 mb-2">
                         <Bell size={20} className="text-blue-600" />
                         <span className="font-semibold text-slate-800">{rule.name}</span>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          rule.severity === 'critical' ? 'bg-red-100 text-red-700' :
-                          rule.severity === 'high' ? 'bg-orange-100 text-orange-700' :
-                          rule.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-blue-100 text-blue-700'
-                        }`}>
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${rule.severity === 'critical' ? 'bg-red-100 text-red-700' :
+                            rule.severity === 'high' ? 'bg-orange-100 text-orange-700' :
+                              rule.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-blue-100 text-blue-700'
+                          }`}>
                           {rule.severity.toUpperCase()}
                         </span>
                         {rule.isActive ? (
@@ -304,7 +303,7 @@ const AlertConfiguration: React.FC<AlertConfigurationProps> = ({ token }) => {
                   placeholder="Alert when error rate exceeds threshold"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Metric *</label>
@@ -380,7 +379,7 @@ const AlertConfiguration: React.FC<AlertConfigurationProps> = ({ token }) => {
                 <input
                   type="text"
                   value={ruleData.channels.email.join(', ')}
-                  onChange={(e) => setRuleData({ ...ruleData, channels: { ...ruleData.channels, email: e.target.value.split(',', 'error').map(s => s.trim()).filter(Boolean) } })}
+                  onChange={(e) => setRuleData({ ...ruleData, channels: { ...ruleData.channels, email: e.target.value.split(',').map(s => s.trim()).filter(Boolean) } })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="admin@example.com, team@example.com"
                 />

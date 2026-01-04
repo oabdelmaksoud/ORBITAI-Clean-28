@@ -15,7 +15,7 @@ export const useProjectOperations = (
   state: ProjectState,
   dispatch: React.Dispatch<ProjectAction>,
   user: { id: string; token?: string } | null,
-  setViewMode: (mode: 'hub' | 'setup' | 'workspace') => void,
+  setViewMode: (mode: 'setup' | 'workspace') => void,
   setProjectList: React.Dispatch<React.SetStateAction<ProjectMetadata[]>>,
   setGlobalMessages: React.Dispatch<React.SetStateAction<any[]>>,
   setAutoPilotStatus: (status: 'idle' | 'running' | 'paused') => void,
@@ -194,7 +194,7 @@ export const useProjectOperations = (
       // If deleted project was current, navigate to hub
       if (state.id === projectId) {
         dispatch({ type: 'RESET_PROJECT', payload: createInitialProjectState(user.id) });
-        setViewMode('hub');
+        setViewMode('landing');
         window.location.hash = '#hub';
       }
 

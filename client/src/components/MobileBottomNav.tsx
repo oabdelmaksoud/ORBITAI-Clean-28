@@ -11,7 +11,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onNavigate
 }) => {
   const navItems = [
-    { id: 'hub', label: 'Hub', icon: Home },
+    { id: 'landing', label: 'Home', icon: Home },
     { id: 'workspace', label: 'Workspace', icon: LayoutGrid },
     { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'profile', label: 'Profile', icon: User },
@@ -30,9 +30,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 h-full touch-manipulation transition-colors ${
-                isActive ? 'text-primary' : 'text-slate-500'
-              }`}
+              className={`flex flex-col items-center justify-center gap-1 flex-1 h-full touch-manipulation transition-colors ${isActive ? 'text-primary' : 'text-slate-500'
+                }`}
               style={{ minWidth: '44px', minHeight: '44px' }}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}

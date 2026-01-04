@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shield, CheckCircle, XCircle, AlertTriangle, Download, RefreshCw, TrendingUp, Target } from 'lucide-react';
-import { projectsApi } from '@src/services/api';
+import { projectsApi } from '@/services/api';
 
 interface ASPICEComplianceMatrixProps {
   projectId: string;

@@ -65,11 +65,21 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ token }) => {
   }
 
   // Calculate growth percentages with null safety
-  const users = data.users || { total: 0, last30Days: 0, last7Days: 0, today: 0, active: 0, byPlan: {} };
+  // Handle union type by checking for both active and active7d properties
+  const rawUsers = data.users || { total: 0, last30Days: 0, last7Days: 0, today: 0 };
+  const users = {
+    ...rawUsers,
+    total: rawUsers.total || 0,
+    last30Days: rawUsers.last30Days || 0,
+    last7Days: rawUsers.last7Days || 0,
+    today: rawUsers.today || 0,
+    active: ('active' in rawUsers ? rawUsers.active : 'active7d' in rawUsers ? rawUsers.active7d : 0) || 0,
+    byPlan: ('byPlan' in rawUsers ? rawUsers.byPlan : {}) || {}
+  };
   const projects = data.projects || { total: 0, last30Days: 0, last7Days: 0, active: 0, byPhase: {} };
-  const dailyTrends = data.dailyTrends || [];
-  
-  const userGrowth30 = users.last30Days > 0 
+  const dailyTrends = ('dailyTrends' in data ? data.dailyTrends : []) || [];
+
+  const userGrowth30 = users.last30Days > 0
     ? ((users.last30Days / Math.max(users.total - users.last30Days, 1)) * 100).toFixed(1)
     : '0';
   const projectGrowth30 = projects.last30Days > 0
@@ -280,7 +290,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ token }) => {
                 {dailyTrends.slice(-30).map((day, index) => {
                   const maxSignups = Math.max(...dailyTrends.map(d => d.userSignups || 0), 1);
                   const maxProjects = Math.max(...dailyTrends.map(d => d.projectCreations || 0), 1);
-                  
+
                   return (
                     <div key={index} className="flex flex-col items-center">
                       <div className="w-full flex flex-col items-center gap-1">
