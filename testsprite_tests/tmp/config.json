@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "executionArgs": {
+    "projectName": "ORBITAI-Clean 28",
+    "projectPath": "/Users/omarabdelmaksoud/Downloads/ORBITAI-Clean 28",
+    "testIds": [],
+    "additionalInstruction": "Focus on testing the prototype generation feature (TC002) and related prototype functionality. Ensure the prototype preview displays correctly and interactive elements work as expected.",
+    "envs": {
+      "API_KEY": "sk-user-zjrQu0Z1J0MyPj7ixjvw9FfUhO54H0YNMFRJjOQaPTmWg8-0hXUznhquEXtiTZZH5fB1qIs-2vBN8W2_9eqwF42d1lMVcb1P_l1ieVBvKAlY7SFxHPirBJZx9GbVJZD97r0"
+    }
+  },
+  "proxy": "http://27107fd6-c448-48e4-9eb1-a876317e2237:36FkdoUb2KQojyZbPziX4xwKq3d3OdGT@tun.testsprite.com:8080"
+}
